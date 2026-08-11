@@ -1,0 +1,46 @@
+// Prisma schema for Fin-Tracker
+// Defines four models: Product, SaleEntry, MarketingSpend, ValuationSetting
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id                String       @id @default(cuid())
+  name              String       @unique
+  pricePerUnit      Float
+  profitMarginPct   Float        // % of revenue counted as profit
+  unitsManufactured Int          @default(0)
+  createdAt         DateTime     @default(now())
+  sales             SaleEntry[]
+}
+
+model SaleEntry {
+  id              String   @id @default(cuid())
+  productId       String
+  product         Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  date            DateTime
+  quantitySold    Int
+  revenueReceived Float    // actual money taken for this sale
+  profit          Float    // computed = revenueReceived * profitMarginPct/100 at time of entry
+  createdAt       DateTime @default(now())
+}
+
+model MarketingSpend {
+  id        String   @id @default(cuid())
+  date      DateTime
+  channel   String?
+  amount    Float
+  createdAt DateTime @default(now())
+}
+
+model ValuationSetting {
+  id         String   @id @default(cuid())
+  multiplier Float    @default(4)  // editable: valuation = trailing profit × this
+  updatedAt  DateTime @updatedAt
+}
