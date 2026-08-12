@@ -8,6 +8,7 @@ import {
   getTrailingProfit,
   getValuation,
   getProductSummary,
+  SaleEntryForCalc,
 } from '@/lib/calculations';
 import { updateMultiplier } from '@/app/actions/valuation-actions';
 
@@ -17,14 +18,27 @@ function formatINR(amount: number): string {
 }
 
 export default async function DashboardPage() {
-  // Fetch all data in parallel for performance
-  const [sales, products, marketingEntries, valuationSetting] =
-    await Promise.all([
+  let sales: SaleEntryForCalc[] = [];
+  let products: any[] = [];
+  let marketingEntries: any[] = [];
+  let valuationSetting: any = null;
+  let dbError = false;
+
+  try {
+    const results = await Promise.all([
       prisma.saleEntry.findMany(),
       prisma.product.findMany({ include: { sales: true } }),
       prisma.marketingSpend.findMany(),
       prisma.valuationSetting.findFirst(),
     ]);
+    sales = results[0];
+    products = results[1];
+    marketingEntries = results[2];
+    valuationSetting = results[3];
+  } catch (error) {
+    console.error('Database connection error on Dashboard:', error);
+    dbError = true;
+  }
 
   // Current month/year for "This Month" calculations
   const now = new Date();
@@ -46,6 +60,18 @@ export default async function DashboardPage() {
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">📊 Dashboard</h1>
+
+      {dbError && (
+        <div className="bg-amber-500/10 border border-amber-500/30 text-amber-200 rounded-xl p-5 mb-8 flex flex-col gap-2 text-sm">
+          <div className="flex items-center gap-2 font-semibold text-amber-400 text-base">
+            <span>⚡ Database Connection Pending</span>
+          </div>
+          <p className="text-xs text-amber-200/80 leading-relaxed">
+            The application is live, but your Neon Postgres database connection string is not yet configured on Vercel. 
+            Please add your <code className="bg-black/40 px-1.5 py-0.5 rounded text-amber-300">DATABASE_URL</code> in Vercel Settings → Environment Variables.
+          </p>
+        </div>
+      )}
 
       {/* ── KPI Cards ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">

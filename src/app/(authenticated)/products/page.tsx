@@ -4,13 +4,32 @@ import { prisma } from '@/lib/db';
 import { createProduct, updateProduct, deleteProduct } from '@/app/actions/product-actions';
 
 export default async function ProductsPage() {
-  const products = await prisma.product.findMany({
-    orderBy: { createdAt: 'desc' },
-  });
+  let products: any[] = [];
+  let dbError = false;
+
+  try {
+    products = await prisma.product.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+  } catch (error) {
+    console.error('Database connection error on Products page:', error);
+    dbError = true;
+  }
 
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">📦 Products</h1>
+
+      {dbError && (
+        <div className="bg-amber-500/10 border border-amber-500/30 text-amber-200 rounded-xl p-5 mb-8 flex flex-col gap-2 text-sm">
+          <div className="flex items-center gap-2 font-semibold text-amber-400 text-base">
+            <span>⚡ Database Connection Pending</span>
+          </div>
+          <p className="text-xs text-amber-200/80 leading-relaxed">
+            Please set your Neon Postgres <code className="bg-black/40 px-1.5 py-0.5 rounded text-amber-300">DATABASE_URL</code> in Vercel Settings → Environment Variables to enable product management.
+          </p>
+        </div>
+      )}
 
       {/* ── Add Product Form ────────────────────────────────── */}
       <div className="bg-[var(--bg-card)] rounded-xl p-6 border border-[var(--border)] mb-8">

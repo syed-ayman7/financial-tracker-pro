@@ -14,17 +14,39 @@ function toInputDate(date: Date): string {
 }
 
 export default async function SalesPage() {
-  const [products, sales] = await Promise.all([
-    prisma.product.findMany({ orderBy: { name: 'asc' } }),
-    prisma.saleEntry.findMany({
-      include: { product: true },
-      orderBy: { date: 'desc' },
-    }),
-  ]);
+  let products: any[] = [];
+  let sales: any[] = [];
+  let dbError = false;
+
+  try {
+    const results = await Promise.all([
+      prisma.product.findMany({ orderBy: { name: 'asc' } }),
+      prisma.saleEntry.findMany({
+        include: { product: true },
+        orderBy: { date: 'desc' },
+      }),
+    ]);
+    products = results[0];
+    sales = results[1];
+  } catch (error) {
+    console.error('Database connection error on Sales page:', error);
+    dbError = true;
+  }
 
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">💰 Sales</h1>
+
+      {dbError && (
+        <div className="bg-amber-500/10 border border-amber-500/30 text-amber-200 rounded-xl p-5 mb-8 flex flex-col gap-2 text-sm">
+          <div className="flex items-center gap-2 font-semibold text-amber-400 text-base">
+            <span>⚡ Database Connection Pending</span>
+          </div>
+          <p className="text-xs text-amber-200/80 leading-relaxed">
+            Please set your Neon Postgres <code className="bg-black/40 px-1.5 py-0.5 rounded text-amber-300">DATABASE_URL</code> in Vercel Settings → Environment Variables to enable sales logging.
+          </p>
+        </div>
+      )}
 
       {/* ── Log a Sale Form ── */}
       <div className="bg-[var(--bg-card)] rounded-xl p-6 border border-[var(--border)] mb-8">
