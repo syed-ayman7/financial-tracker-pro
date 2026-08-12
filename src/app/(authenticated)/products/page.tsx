@@ -3,8 +3,17 @@ export const dynamic = 'force-dynamic';
 import { prisma } from '@/lib/db';
 import { createProduct, updateProduct, deleteProduct } from '@/app/actions/product-actions';
 
+interface ProductItem {
+  id: string;
+  name: string;
+  pricePerUnit: number;
+  profitMarginPct: number;
+  unitsManufactured: number;
+  createdAt: Date;
+}
+
 export default async function ProductsPage() {
-  let products: any[] = [];
+  let products: ProductItem[] = [];
   let dbError = false;
 
   try {

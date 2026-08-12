@@ -7,6 +7,13 @@ import {
   deleteMarketingSpend,
 } from '@/app/actions/marketing-actions';
 
+interface MarketingEntry {
+  id: string;
+  date: Date;
+  channel: string | null;
+  amount: number;
+}
+
 /** Format a number as Indian Rupees */
 function formatINR(amount: number): string {
   return '₹' + amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -18,7 +25,7 @@ function toInputDate(date: Date): string {
 }
 
 export default async function MarketingPage() {
-  let entries: any[] = [];
+  let entries: MarketingEntry[] = [];
   let dbError = false;
 
   try {

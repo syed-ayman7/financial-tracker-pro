@@ -12,6 +12,30 @@ import {
 } from '@/lib/calculations';
 import { updateMultiplier } from '@/app/actions/valuation-actions';
 
+interface ProductWithSales {
+  id: string;
+  name: string;
+  pricePerUnit: number;
+  profitMarginPct: number;
+  unitsManufactured: number;
+  createdAt: Date;
+  sales: SaleEntryForCalc[];
+}
+
+interface MarketingSpendItem {
+  id: string;
+  date: Date;
+  channel: string | null;
+  amount: number;
+  createdAt: Date;
+}
+
+interface ValuationSettingItem {
+  id: string;
+  multiplier: number;
+  updatedAt: Date;
+}
+
 /** Format a number as Indian Rupees */
 function formatINR(amount: number): string {
   return '₹' + amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -19,9 +43,9 @@ function formatINR(amount: number): string {
 
 export default async function DashboardPage() {
   let sales: SaleEntryForCalc[] = [];
-  let products: any[] = [];
-  let marketingEntries: any[] = [];
-  let valuationSetting: any = null;
+  let products: ProductWithSales[] = [];
+  let marketingEntries: MarketingSpendItem[] = [];
+  let valuationSetting: ValuationSettingItem | null = null;
   let dbError = false;
 
   try {

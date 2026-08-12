@@ -3,6 +3,22 @@ export const dynamic = 'force-dynamic';
 import { prisma } from '@/lib/db';
 import { createSale, updateSale, deleteSale } from '@/app/actions/sale-actions';
 
+interface ProductItem {
+  id: string;
+  name: string;
+  profitMarginPct: number;
+}
+
+interface SaleItemWithProduct {
+  id: string;
+  productId: string;
+  date: Date;
+  quantitySold: number;
+  revenueReceived: number;
+  profit: number;
+  product: ProductItem;
+}
+
 /** Format a number as Indian Rupees */
 function formatINR(amount: number): string {
   return '₹' + amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -14,8 +30,8 @@ function toInputDate(date: Date): string {
 }
 
 export default async function SalesPage() {
-  let products: any[] = [];
-  let sales: any[] = [];
+  let products: ProductItem[] = [];
+  let sales: SaleItemWithProduct[] = [];
   let dbError = false;
 
   try {
