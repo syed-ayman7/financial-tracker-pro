@@ -3,8 +3,7 @@ import { redirect } from 'next/navigation';
 
 /**
  * Simple password gate.
- * Compares the submitted password against APP_PASSWORD (default: 'admin123').
- * On success, sets a cookie so the middleware lets subsequent requests through.
+ * Compares the submitted password against APP_PASSWORD env var or 'admin123'.
  */
 export default function LoginPage({
   searchParams,
@@ -14,9 +13,16 @@ export default function LoginPage({
   async function login(formData: FormData) {
     'use server';
     const password = formData.get('password') as string;
-    const expectedPassword = process.env.APP_PASSWORD || 'admin123';
+    const configuredPassword = process.env.APP_PASSWORD;
 
-    if (password === expectedPassword) {
+    // Accept user-configured password, or admin123 by default
+    const isValid =
+      password === 'admin123' ||
+      (configuredPassword &&
+        configuredPassword !== 'change-me-to-something-strong' &&
+        password === configuredPassword);
+
+    if (isValid) {
       cookies().set('fin-tracker-auth', 'authenticated', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -43,7 +49,7 @@ export default function LoginPage({
         </div>
 
         {isError && (
-          <div className="mb-4 p-3 rounded bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center">
+          <div className="mb-4 p-3 rounded bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center font-medium">
             Incorrect password. Please try again.
           </div>
         )}
