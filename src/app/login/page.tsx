@@ -3,15 +3,20 @@ import { redirect } from 'next/navigation';
 
 /**
  * Simple password gate.
- * Compares the submitted password against the APP_PASSWORD env var.
+ * Compares the submitted password against APP_PASSWORD (default: 'admin123').
  * On success, sets a cookie so the middleware lets subsequent requests through.
  */
-export default function LoginPage() {
+export default function LoginPage({
+  searchParams,
+}: {
+  searchParams?: { error?: string };
+}) {
   async function login(formData: FormData) {
     'use server';
     const password = formData.get('password') as string;
+    const expectedPassword = process.env.APP_PASSWORD || 'admin123';
 
-    if (password === process.env.APP_PASSWORD) {
+    if (password === expectedPassword) {
       cookies().set('fin-tracker-auth', 'authenticated', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -25,8 +30,10 @@ export default function LoginPage() {
     }
   }
 
+  const isError = searchParams?.error === '1';
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--bg-primary)]">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--bg-primary)] p-4">
       <div className="bg-[var(--bg-card)] rounded-xl p-8 border border-[var(--border)] w-full max-w-sm">
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold text-white">🔒 Fin-Tracker</h1>
@@ -34,6 +41,13 @@ export default function LoginPage() {
             Enter your password to access the dashboard
           </p>
         </div>
+
+        {isError && (
+          <div className="mb-4 p-3 rounded bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center">
+            Incorrect password. Please try again.
+          </div>
+        )}
+
         <form action={login} className="space-y-4">
           <div>
             <label className="block text-sm text-[var(--text-secondary)] mb-1">
