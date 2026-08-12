@@ -1,10 +1,7 @@
+export const dynamic = 'force-dynamic';
+
 import { prisma } from '@/lib/db';
 import { createProduct, updateProduct, deleteProduct } from '@/app/actions/product-actions';
-
-/** Format a number as Indian Rupees */
-function formatINR(amount: number): string {
-  return '₹' + amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
 
 export default async function ProductsPage() {
   const products = await prisma.product.findMany({

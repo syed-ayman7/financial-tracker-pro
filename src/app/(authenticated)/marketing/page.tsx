@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { prisma } from '@/lib/db';
 import {
   createMarketingSpend,
@@ -55,7 +57,8 @@ export default async function MarketingPage() {
 
       {/* ── Total spend summary ── */}
       <div className="mb-4 text-sm text-[var(--text-secondary)]">
-        Total all-time marketing spend: <span className="text-[var(--warning)] font-semibold">{formatINR(totalSpend)}</span>
+        Total all-time marketing spend:{' '}
+        <span className="text-[var(--warning)] font-semibold">{formatINR(totalSpend)}</span>
       </div>
 
       {/* ── Spend Log ── */}
@@ -67,69 +70,58 @@ export default async function MarketingPage() {
         {entries.length === 0 ? (
           <p className="text-[var(--text-muted)] text-center py-12">No marketing spend logged yet.</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-[var(--text-muted)] border-b border-[var(--border)]">
-                  <th className="p-4 font-medium">Date</th>
-                  <th className="p-4 font-medium">Channel</th>
-                  <th className="p-4 font-medium text-right">Amount</th>
-                  <th className="p-4 font-medium text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {entries.map((entry) => (
-                  <tr key={entry.id} className="border-b border-[var(--border)] hover:bg-[var(--bg-input)]/30 transition-colors">
-                    <td className="p-4">
-                      <form action={updateMarketingSpend.bind(null, entry.id)} className="flex items-center gap-2">
-                        <input
-                          type="date"
-                          name="date"
-                          defaultValue={toInputDate(entry.date)}
-                          className="text-xs w-32"
-                        />
-                    </td>
-                    <td className="p-4">
-                        <input
-                          type="text"
-                          name="channel"
-                          defaultValue={entry.channel || ''}
-                          placeholder="No channel"
-                          className="text-xs w-36"
-                        />
-                    </td>
-                    <td className="p-4 text-right text-[var(--warning)]">
-                        <input
-                          type="number"
-                          name="amount"
-                          defaultValue={entry.amount}
-                          step="0.01"
-                          min="0"
-                          className="text-xs w-24 text-right"
-                        />
-                    </td>
-                    <td className="p-4 text-center">
-                        <div className="flex justify-center gap-2">
-                          <button
-                            type="submit"
-                            className="text-xs bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white py-1 px-3 rounded transition-colors"
-                          >
-                            Save
-                          </button>
-                          <button
-                            type="button"
-                            className="text-xs bg-[var(--danger)] hover:bg-[var(--danger-hover)] text-white py-1 px-3 rounded transition-colors"
-                            formAction={deleteMarketingSpend.bind(null, entry.id)}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </form>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="space-y-0">
+            {/* Grid header */}
+            <div className="grid grid-cols-[120px_1fr_120px_140px] gap-2 px-4 py-3 text-xs text-[var(--text-muted)] border-b border-[var(--border)] font-medium">
+              <span>Date</span>
+              <span>Channel</span>
+              <span className="text-right">Amount</span>
+              <span className="text-center">Actions</span>
+            </div>
+            {/* Each entry as its own form */}
+            {entries.map((entry) => (
+              <form
+                key={entry.id}
+                action={updateMarketingSpend.bind(null, entry.id)}
+                className="grid grid-cols-[120px_1fr_120px_140px] gap-2 px-4 py-3 items-center border-b border-[var(--border)] hover:bg-[var(--bg-input)]/30 transition-colors"
+              >
+                <input
+                  type="date"
+                  name="date"
+                  defaultValue={toInputDate(entry.date)}
+                  className="text-xs"
+                />
+                <input
+                  type="text"
+                  name="channel"
+                  defaultValue={entry.channel || ''}
+                  placeholder="No channel"
+                  className="text-xs"
+                />
+                <input
+                  type="number"
+                  name="amount"
+                  defaultValue={entry.amount}
+                  step="0.01"
+                  min="0"
+                  className="text-xs text-right"
+                />
+                <div className="flex justify-center gap-2">
+                  <button
+                    type="submit"
+                    className="text-xs bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white py-1 px-3 rounded transition-colors"
+                  >
+                    Save
+                  </button>
+                  <button
+                    formAction={deleteMarketingSpend.bind(null, entry.id)}
+                    className="text-xs bg-[var(--danger)] hover:bg-[var(--danger-hover)] text-white py-1 px-3 rounded transition-colors"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </form>
+            ))}
           </div>
         )}
       </div>
